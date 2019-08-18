@@ -11,6 +11,12 @@ def get_headers(csv_data: list):
     return headers
 
 
+def replace_column(scripts:list, headers:list, column_header:str, replace_with:any) -> list:
+    position=headers.index(column_header)
+    for row in scripts:
+        row[position]=replace_with
+
+
 def create_script(csv_data: list, table, include_header: bool):
     insert_str = "INSERT into "+table+" VALUES ( "
     final = []
