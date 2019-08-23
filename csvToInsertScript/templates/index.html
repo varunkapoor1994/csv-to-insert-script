@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>script converter</title>
+</head>
+
+<body>
+    <div class="containter">
+        <div>
+            <nav class="navbar navbar-dark bg-dark">
+                <a class="navbar-brand" href="#">Script Converter</a>
+            </nav>
+        </div>
+        <div class="row" style="margin-top: 40px">
+            <div class="col">
+            </div>
+            <div class="col">
+                <form method="post">
+                    <div class="form-group">
+                        <label for="csvFile">Select CSV file</label>
+                        <input type="file" class="form-control-file" id="csvFile">
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="headers" aria-describedby="headerHelp">
+                        <label class="form-check-label" for="headers">Headers</label>
+                        <small id="headerHelp" class="form-text text-muted">Check me if headers are present in the
+                            csv
+                            file</small>
+                    </div>
+                    <div class="form-group">
+                            <label for="table">Table Name</label>
+                            <input type="text" class="form-control" id="table" aria-describedby="tableHelp"
+                                placeholder="Enter table name">
+                            <small id="tableHelp" class="form-text text-muted">Enter the table name for which insert script
+                                needs to be prepared</small>
+                        </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="replaceheaders"
+                            aria-describedby="headerHelp" onclick="showReplaceColDiv(this)">
+                        <label class="form-check-label" for="replaceheaders" >Replace
+                            column(s)</label>
+                        <small id="replaceheaderHelp" class="form-text text-muted">check me to replace a column based on
+                            the header name</small>
+                    </div>
+                    
+                    <div class="row" id="replaceColumnDiv" style="display: none">
+                        <div class="col form-group">
+                            <label for="replacecolumn">Column to replace</label>
+                            <select class="form-control" id="replacecolumn" aria-describedby="repacecolumnHelp">
+                                <option>Default select</option>
+                            </select>
+                            <small id="repacecolumnHelp" class="form-text text-muted">select the column you want to
+                                replace</small>
+
+                        </div>
+                        <div class="col form-group">
+                            <label for="repacecolumnwith">Replace with :</label>
+                            <input type="text" class="form-control" id="repacecolumnwith"
+                                placeholder="Enter value to replace with">
+                                <small id="repacecolumnHelp" class="form-text text-muted">Enter the value to replace with</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="outputFileName">Output file name</label>
+                        <input type="text" class="form-control" id="outputFileName"
+                            placeholder="Enter output file name">
+                    </div>
+                    <div style="margin-top: 20px">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col">
+            </div>
+        </div>
+    </div>
+    <!-- Optional JavaScript -->
+    <script type="text/javascript">
+        function showReplaceColDiv(value) {
+        var replaceColumnDiv = document.getElementById("replaceColumnDiv");
+        replaceColumnDiv.style.display = value.checked ? "flex" : "none";
+        var formData = new FormData();
+        var fileField = document.getElementById("csvFile");
+        formData.append('csvFile', fileField);
+        fetch('http://localhost:8000/csv-to-insert-script/getheaders', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .catch(error => console.error('Error:', error))
+            .then(response => console.log('Success:', JSON.stringify(response)));
+    }
+    
+        </script>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
