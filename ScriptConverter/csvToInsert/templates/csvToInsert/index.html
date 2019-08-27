@@ -20,31 +20,33 @@
                 <a class="navbar-brand" href="#">Script Converter</a>
             </nav>
         </div>
+
         <div class="row" style="margin-top: 40px">
             <div class="col">
             </div>
             <div class="col">
-                <form method="post">
+                {% if error_message %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error_message }}
+                </div>
+                {% endif %}
+                <form action="{% url 'csv-to-insert:createScript' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
                     <div class="form-group">
                         <label for="csvFile">Select CSV file</label>
-                        <input type="file" class="form-control-file" id="csvFile">
+                        <input type="file" class="form-control-file" id="csvFile" name="csvfile" required>
                     </div>
                     <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="headers" aria-describedby="headerHelp">
+                        <input type="checkbox" class="form-check-input" id="headers" aria-describedby="headerHelp"
+                            onclick="showReplaceHeaders(this)" name="isheaders">
                         <label class="form-check-label" for="headers">Headers</label>
                         <small id="headerHelp" class="form-text text-muted">Check me if headers are present in the
                             csv
                             file</small>
                     </div>
-                    <div class="form-group">
-                        <label for="table">Table Name</label>
-                        <input type="text" class="form-control" id="table" aria-describedby="tableHelp"
-                            placeholder="Enter table name">
-                        <small id="tableHelp" class="form-text text-muted">Enter the table name for which insert script
-                            needs to be prepared</small>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input" id="replaceheaders"
+
+                    <div class="form-check" id="replaceheadersdiv" style="display: none">
+                        <input type="checkbox" class="form-check-input" name="replaceheaders" id="replaceheaders"
                             aria-describedby="headerHelp" onclick="showReplaceColDiv(this)">
                         <label class="form-check-label" for="replaceheaders">Replace
                             column(s)</label>
@@ -55,7 +57,7 @@
                     <div class="row" id="replaceColumnDiv" style="display: none">
                         <div class="col form-group">
                             <label for="replacecolumn">Column to replace</label>
-                            <select class="form-control" id="replacecolumn" aria-describedby="repacecolumnHelp">
+                            <select class="form-control" id="replacecolumn" name="replacecolumn" aria-describedby="repacecolumnHelp">
                                 <option>select column</option>
                             </select>
                             <small id="repacecolumnHelp" class="form-text text-muted">select the column you want to
@@ -64,11 +66,18 @@
                         </div>
                         <div class="col form-group">
                             <label for="repacecolumnwith">Replace with :</label>
-                            <input type="text" class="form-control" id="repacecolumnwith"
+                            <input type="text" name="repacecolumnwith" class="form-control" id="repacecolumnwith"
                                 placeholder="Enter value to replace with">
                             <small id="repacecolumnHelp" class="form-text text-muted">Enter the value to replace
                                 with</small>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="table">Table Name</label>
+                        <input type="text" class="form-control" name="table" id="table" aria-describedby="tableHelp"
+                            placeholder="Enter table name" required>
+                        <small id="tableHelp" class="form-text text-muted">Enter the table name for which insert script
+                            needs to be prepared</small>
                     </div>
                     <div class="form-group">
                         <label for="outputFileName">Output file name</label>
@@ -76,7 +85,7 @@
                             placeholder="Enter output file name">
                     </div>
                     <div style="margin-top: 20px">
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="submit" class="btn btn-primary" value="convert"> Submit</button>
                     </div>
                 </form>
             </div>
@@ -86,7 +95,6 @@
     </div>
     <!-- Optional JavaScript -->
     <script type="text/javascript">
-
         function showReplaceColDiv(value) {
             var replaceColumnDiv = document.getElementById("replaceColumnDiv");
             replaceColumnDiv.style.display = value.checked ? "flex" : "none";
@@ -105,17 +113,27 @@
                     .catch(error => console.error('Error:', error))
                     .then(response => {
                         //res=JSON.stringify(response);
-                        console.log('Success:', response);
-                        headers = response["headers"];
-                        console.log(headers)
-                        var list = document.getElementById("replacecolumn");
-                        for (var i in headers) {
-                            list.add(new Option(headers[i], headers[i]));
+                        console.log(response);
+                        if (response["headers"]) {
+                            headers = response["headers"];
+                            console.log(headers)
+                            var list = document.getElementById("replacecolumn");
+                            for (var i in headers) {
+                                list.add(new Option(headers[i], headers[i]));
+                            }
+                        } else {
+                            console.log("error : ", response["error"])
+
                         }
+
 
 
                     });
             }
+        }
+        function showReplaceHeaders(value) {
+            var replaceheadersdiv = document.getElementById("replaceheadersdiv");
+            replaceheadersdiv.style.display = value.checked ? "flex" : "none";
         }
 
     </script>
