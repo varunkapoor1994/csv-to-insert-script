@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse,JsonResponse
+from django.http import HttpResponse,JsonResponse,StreamingHttpResponse
 from . import service
 
 
@@ -42,15 +42,24 @@ def create_script(request):
 
             if not request.POST.get("table"):
                 message="Please enter a table name"
+                return HttpResponse(message)
 
             if not request.POST.get("outputFileName"):
                 outputfile=request.FILES.get('csvfile').name.split('.')[0]+".sql"
-
-            if request.POST.get("replaceheaders"):
-                replace=request.POST.get("replacecolumn")
-                replacewith=request.POST.get("repacecolumnwith")
-
-            return HttpResponse("Creating form")
+            else:
+                outputfile=request.POST.get("outputFileName")
+            data=service.process_file(request)
+            print(data)
+            response = StreamingHttpResponse(data, content_type="text/plain")
+            response['Content-Disposition'] = 'attachment; filename='+outputfile
+            return response
         except Exception as e:
             print(e)
         return HttpResponse("Creating form")
+
+
+def download(request):
+    data=["hello world","two"]
+    response = StreamingHttpResponse(data, content_type="text/plain")
+    response['Content-Disposition'] = 'attachment; filename="abc.sql"'
+    return response
