@@ -12,9 +12,12 @@ def replace_column(scripts: list, headers: list, column_header: str, replace_wit
 
 
 def create_insert_script(csv_data: list, table, include_header: bool, column_header=None, replace_with=None):
+    print("-----------------------------------------------------\n",csv_data)
+    print(type(csv_data))
     insert_str = "INSERT into "+table+" VALUES ( "
-    index = 0 if include_header else 1
-    if index and column_header and replace_with:
+    index = 1 if include_header else 0
+    print("index--------------------------------------------------",index)
+    if column_header and replace_with:
         position = csv_data[0].index(column_header)
         return create_statement_with_replace(csv_data, index, insert_str, replace_with, position)
     return create_statement(csv_data, index, insert_str)
@@ -23,7 +26,9 @@ def create_insert_script(csv_data: list, table, include_header: bool, column_hea
 def create_statement(csv_data: list, index: int, insert_str: str):
     final = []
     for row in csv_data[index:]:
-        final.append(insert_str+', '.join(map(str, row))+" );\n")
+        row=row.split(",")
+        final.append(insert_str+', '.join(map(str, row))+" );")
+        print(insert_str+', '.join(map(str, row))+" );")
     return final
 
 
@@ -31,7 +36,7 @@ def create_statement_with_replace(csv_data: list, index: int, insert_str: str, r
     final = []
     for row in csv_data[index:]:
         row[position] = replace_with
-        final.append(insert_str+', '.join(map(str, row))+" );\n")
+        final.append(insert_str+', '.join(map(str, row))+" );")
     return final
 
 
@@ -43,17 +48,23 @@ def write_scripts(content: str, file_path: str):
 
 def process_file(request):
     try:
+        isheaders=False
+        isreplace=False
+        if request.POST.get("isheaders")=='on':
+            isheaders=True
+        if request.POST.get("replaceheaders")=='on':
+            isreplace=True
+        print("BOOLS",isheaders,isreplace)
         csv_file = request.FILES.get('csvfile')
         file_data = csv_file.read().decode("utf-8").split("\n")
-        if request.POST.get("isheaders") and request.POST.get("replaceheaders"):
-            data = create_insert_script(file_data, request.POST.get("table"), request.POST.get(
-                "isheaders"), request.POST.get("replacecolumn"), request.POST.get("repacecolumnwith"))  
+        print("--------------------------------",file_data)
+        if isheaders and isreplace:
+            data = create_insert_script(file_data, request.POST.get("table"), isheaders, request.POST.get("replacecolumn"), request.POST.get("repacecolumnwith"))  
 
         if not request.POST.get("replaceheaders"):
-            data = create_insert_script(file_data, request.POST.get("table"), request.POST.get(
-                "isheaders"))
-
-        return "\n".join(data)
+            data = create_insert_script(file_data, request.POST.get("table"), isheaders)
+            print(data)
+        return data
     except Exception as e:
         print(e)
         return str(e)
